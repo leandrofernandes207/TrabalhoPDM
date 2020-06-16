@@ -18,7 +18,9 @@ import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
 import android.hardware.Camera.*;
 import android.os.Bundle;
+import android.os.Debug;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -45,7 +47,7 @@ public class TrabalhoActivity extends Activity implements SurfaceHolder.Callback
 
     int angle = 0, count = 0, MAX = 5, roi = 128;
     private static final int CAMERA_REQUEST_CODE = 100;
-    Bitmap bmap, aux;
+    Bitmap bmap, aux, recorte;
     int[] RedHistogram = new int[256];
     int[] GreenHistogram = new int[256];
     int[] BlueHistogram = new int[256];
@@ -128,7 +130,7 @@ public class TrabalhoActivity extends Activity implements SurfaceHolder.Callback
             PointF DownPT = new PointF(); // Record Mouse Position When Pressed Down
             PointF StartPT = new PointF(); // Record Start Position of 'img'
 
-            @Override
+           @Override
             public boolean onTouch(View v, MotionEvent event) {
 
                 switch (event.getAction()) {
@@ -208,8 +210,9 @@ public class TrabalhoActivity extends Activity implements SurfaceHolder.Callback
         int sourceHeight = source.getHeight();
         float left = (newWidth - sourceWidth) / 2f;
         float top = (newHeight - sourceHeight) / 2f;
+        Log.d("tam",newWidth+" "+newHeight+" "+left+" "+top);
         RectF targetRect = new RectF(left, top, left + sourceWidth, top + sourceHeight);
-        txtDebug.setText(left + "," + top + "," + (left + sourceWidth) + "," + (top + sourceHeight));
+        txtDebug.setText(targetRect.toString());
         Bitmap dest = Bitmap.createBitmap(newWidth, newHeight, source.getConfig());
         Canvas canvas = new Canvas(dest);
         canvas.drawBitmap(source, null, targetRect, null);
@@ -264,10 +267,12 @@ public class TrabalhoActivity extends Activity implements SurfaceHolder.Callback
         jpegCallback = new PictureCallback() {
             @Override
             public void onPictureTaken(byte[] data, Camera camera) {
-                //decode the data obtained by the camera into a Bitmap
+                //decodifica a imagem recebida  da camera em um bitmap
                 bmap = BitmapFactory.decodeByteArray(data, 0, data.length);
 
                 //modificar
+                // apenas recorta a imagem central 128x128 pixels
+                // recorte = bmp recortado
                 aux = RotateBitmap(CenterCrop(bmap, roi, roi), angle);
 
                 photoImage.setImageBitmap(aux);
@@ -326,7 +331,7 @@ public class TrabalhoActivity extends Activity implements SurfaceHolder.Callback
         try {
             camera = Camera.open();
             param = camera.getParameters();
-            // Size optimalSize = getOptimalPictureSize();
+             //Size optimalSize = getOptimalPictureSize();
             List<String> focus = param.getSupportedFocusModes();
             if (focus != null) {
                 int mode = 0;
