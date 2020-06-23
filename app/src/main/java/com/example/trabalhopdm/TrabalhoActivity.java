@@ -51,8 +51,10 @@ public class TrabalhoActivity extends Activity implements SurfaceHolder.Callback
     int[] RedHistogram = new int[256];
     int[] GreenHistogram = new int[256];
     int[] BlueHistogram = new int[256];
+    String[] cores = new String[5];
     ImageView photoImage = null, imageRoi = null;
     TextView txtR, txtG, txtB, txtCount, txtDebug, txtLastSample;
+    int Red,Green,Blue;
     Boolean autoscale = true, reverse = false;
     float X = 0, Y = 0;
     EditText txtSample;
@@ -122,6 +124,7 @@ public class TrabalhoActivity extends Activity implements SurfaceHolder.Callback
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(), ListaActivity.class);
+                intent.putExtra("cores",cores);
                 startActivity(intent);
             }
         });
@@ -210,7 +213,6 @@ public class TrabalhoActivity extends Activity implements SurfaceHolder.Callback
         int sourceHeight = source.getHeight();
         float left = (newWidth - sourceWidth) / 2f;
         float top = (newHeight - sourceHeight) / 2f;
-        Log.d("tam",newWidth+" "+newHeight+" "+left+" "+top);
         RectF targetRect = new RectF(left, top, left + sourceWidth, top + sourceHeight);
         txtDebug.setText(targetRect.toString());
         Bitmap dest = Bitmap.createBitmap(newWidth, newHeight, source.getConfig());
@@ -244,19 +246,17 @@ public class TrabalhoActivity extends Activity implements SurfaceHolder.Callback
                 blueTotal += blueValue;
             }
         }
-
+        Red=redTotal / (bmp.getHeight() * bmp.getWidth());
+        Green= greenTotal/ (bmp.getHeight() * bmp.getWidth());
+        Blue=blueTotal / (bmp.getHeight() * bmp.getWidth());
+        cores[count]="#"+Integer.toHexString(Red)+Integer.toHexString(Green)+Integer.toHexString(Blue);
         //salvar banco de dados
 
-        txtR.setText("R :"
-                + (redTotal / (bmp.getHeight() * bmp.getWidth())));
-        txtG.setText("G :"
-                + (greenTotal
-                / (bmp.getHeight() * bmp.getWidth())));
-        txtB.setText("B :"
-                + (blueTotal / (bmp.getHeight() * bmp.getWidth())));
 
+        txtR.setText("R :" + Red);
+        txtG.setText("G :"+ Green);
+        txtB.setText("B :" + Blue);
     }
-
 
     private void init() {
 
@@ -271,8 +271,6 @@ public class TrabalhoActivity extends Activity implements SurfaceHolder.Callback
                 bmap = BitmapFactory.decodeByteArray(data, 0, data.length);
 
                 //modificar
-                // apenas recorta a imagem central 128x128 pixels
-                // recorte = bmp recortado
                 aux = RotateBitmap(CenterCrop(bmap, roi, roi), angle);
 
                 photoImage.setImageBitmap(aux);
